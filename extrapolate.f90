@@ -61,61 +61,61 @@ multiplier=1.0_dp
         intervalSG_LR(ii)=intervalSG_LR(ii-1)*decays(4,4,1)+intervalFN(ii-1)*decays(1,4,1)+intervalTN_LR(ii-1)*decays(2,4,1)+intervalPG(ii-1)*decays(3,4,1)+intervalTN_RL(ii)*decays(2,4,2)
       end do
 
-  !=============================
-      print*,'look',decays(2,4,2),decays(2,4,1)
-   open(100, file="intFN.dat", status="unknown")
-       writeLoop=0.0_dp
-     do ii=1,(numSub)
-
-       write(100,*) writeLoop,intervalFN(ii)
-       writeLoop=writeLoop+domainLength/numSub
-     end do
-   close(100)
-
-   open(100, file="intTN_LR.dat", status="unknown")
-       writeLoop=0.0_dp
-     do ii=1,(numSub)
-
-       write(100,*) writeLoop,intervalTN_LR(ii)
-       writeLoop=writeLoop+domainLength/numSub
-     end do
-   close(100)
-
-   open(100, file="intTN_RL.dat", status="unknown")
-       writeLoop=0.0_dp
-     do ii=1,(numSub)
-
-       write(100,*) writeLoop,intervalTN_RL(ii)
-       writeLoop=writeLoop+domainLength/numSub
-     end do
-   close(100)
-
-   open(100, file="intSG_LR.dat", status="unknown")
-       writeLoop=0.0_dp
-     do ii=1,(numSub)
-
-       write(100,*) writeLoop,intervalSG_LR(ii)
-       writeLoop=writeLoop+domainLength/numSub
-     end do
-   close(100)
-
-   open(100, file="intSG_RL.dat", status="unknown")
-       writeLoop=0.0_dp
-     do ii=1,(numSub)
-
-       write(100,*) writeLoop,intervalSG_RL(ii)
-       writeLoop=writeLoop+domainLength/numSub
-     end do
-   close(100)
-
-   open(100, file="intPG.dat", status="unknown")
-       writeLoop=0.0_dp
-     do ii=1,(numSub)
-
-       write(100,*) writeLoop,intervalPG(ii)
-       writeLoop=writeLoop+domainLength/numSub
-     end do
-   close(100)
+  !=============================uncomment
+  !     print*,'look',decays(2,4,2),decays(2,4,1)
+  !  open(100, file="intFN.dat", status="unknown")
+  !      writeLoop=0.0_dp
+  !    do ii=1,(numSub)
+   !
+  !      write(100,*) writeLoop,intervalFN(ii)
+  !      writeLoop=writeLoop+domainLength/numSub
+  !    end do
+  !  close(100)
+   !
+  !  open(100, file="intTN_LR.dat", status="unknown")
+  !      writeLoop=0.0_dp
+  !    do ii=1,(numSub)
+   !
+  !      write(100,*) writeLoop,intervalTN_LR(ii)
+  !      writeLoop=writeLoop+domainLength/numSub
+  !    end do
+  !  close(100)
+   !
+  !  open(100, file="intTN_RL.dat", status="unknown")
+  !      writeLoop=0.0_dp
+  !    do ii=1,(numSub)
+   !
+  !      write(100,*) writeLoop,intervalTN_RL(ii)
+  !      writeLoop=writeLoop+domainLength/numSub
+  !    end do
+  !  close(100)
+   !
+  !  open(100, file="intSG_LR.dat", status="unknown")
+  !      writeLoop=0.0_dp
+  !    do ii=1,(numSub)
+   !
+  !      write(100,*) writeLoop,intervalSG_LR(ii)
+  !      writeLoop=writeLoop+domainLength/numSub
+  !    end do
+  !  close(100)
+   !
+  !  open(100, file="intSG_RL.dat", status="unknown")
+  !      writeLoop=0.0_dp
+  !    do ii=1,(numSub)
+   !
+  !      write(100,*) writeLoop,intervalSG_RL(ii)
+  !      writeLoop=writeLoop+domainLength/numSub
+  !    end do
+  !  close(100)
+   !
+  !  open(100, file="intPG.dat", status="unknown")
+  !      writeLoop=0.0_dp
+  !    do ii=1,(numSub)
+   !
+  !      write(100,*) writeLoop,intervalPG(ii)
+  !      writeLoop=writeLoop+domainLength/numSub
+  !    end do
+  !  close(100)
 
 !===============================================================
 
@@ -211,12 +211,12 @@ multiplier=1.0_dp
         !TN causing SG going left to right
         tempTN(4,((numDisc+1)-ii))=causeTN(4,ii)
     end do
-    print*,causeFN(5,:)
-    open(100, file="tempFN.dat", status="unknown")
-     do ii=1,numDisc
-       write(100,*) xArray(ii), tempFN(5,ii)
-     end do
-    close(100)
+    !print*,causeFN(5,:)
+    ! open(100, file="tempFN.dat", status="unknown")
+    !  do ii=1,numDisc
+    !    write(100,*) xArray(ii), tempFN(5,ii)
+    !  end do
+    ! close(100)
 
           ! psiTN_RL(1:numDisc)=tempTN(2,:)*intervalTN_RL(2)+tempFN(5,:)*intervalFN(2)
           !
@@ -239,12 +239,12 @@ multiplier=1.0_dp
       !todo
 
     end do
-    do ii=1,total
-      !print*,psiTN_RL(ii)
-    end do
-    do ii=numSub-1,1
-    !  psiSG_RL(ii*numDisc:(ii-1)*numDisc)=
-    end do
+!     do ii=1,total
+!       !print*,psiTN_RL(ii)
+!     end do
+!     do ii=numSub-1,1
+!     !  psiSG_RL(ii*numDisc:(ii-1)*numDisc)=
+!     end do
     do ii=1,total
       !print*,'x',psiFN(ii)
     end do

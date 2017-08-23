@@ -41,6 +41,7 @@ contains
 
     integer :: ii
 !allocation
+!print*,'crosssec ',captureCS(1),particleCS(1,:)
       subLength=length/numSub
       delta=subLength/numDisc
 
@@ -65,9 +66,11 @@ contains
     !fast neutrons
     subQ_FN=0.0_dp
     !want to sum first row of cross section area
+    !print*,'look',sourcesL(1),totalCS(1),numDisc,length,subQ_FN,subPsiFN,subX,rhsFN
     call dsolve(sourcesL(1),totalCS(1),numDisc,length,subQ_FN,subPsiFN,subX,rhsFN)
+
     ! do ii=1,numDisc
-       !print*,subPsiFN(ii),subX(ii)
+    !    print*,subPsiFN(ii),subX(ii)
     ! end do
 !==================================
     !thermal neutrons
@@ -90,40 +93,40 @@ contains
     call backsolve(sourcesR(4),totalCS(4),numDisc,length,subQ_SG_LR,subPsiSG_RL,subX,lhsSG)
   !  print*,particleCS(2,4)*subPsiTN*factors(4,2)
     !real(kind=dp),dimension(:) :: xArray,subPsiFN,subPsiTN,subPsiPG,subPsiSG,subX,subQ_FN,subQ_PG,subQ_TN,subQ_SG
-         open(100, file="dataFN.dat", status="unknown")
-          do ii=1,numDisc
-             write(100,*) subX(ii), subPsiFN(ii)
-           end do
-         close(100)
+         ! open(100, file="dataFN.dat", status="unknown")
+         !  do ii=1,numDisc
+         !     write(100,*) subX(ii), subPsiFN(ii)
+         !   end do
+         ! close(100)
 
-         open(100, file="dataPG.dat", status="unknown")
-         do ii=1,numDisc
-            write(100,*) subX(ii), subPsiPG(ii)
-          end do
-         close(100)
+         ! open(100, file="dataPG.dat", status="unknown")
+         ! do ii=1,numDisc
+         !    write(100,*) subX(ii), subPsiPG(ii)
+         !  end do
+         ! close(100)
 
-         open(100, file="dataTN_LR.dat", status="unknown")
-          do ii=1,numDisc
-             write(100,*) subX(ii), subPsiTN_LR(ii)
-           end do
-         close(100)
-         open(100, file="dataTN_RL.dat", status="unknown")
-          do ii=1,numDisc
-             write(100,*) subX(ii), subPsiTN_RL(ii)
-           end do
-         close(100)
+         ! open(100, file="dataTN_LR.dat", status="unknown")
+         !  do ii=1,numDisc
+         !     write(100,*) subX(ii), subPsiTN_LR(ii)
+         !   end do
+         ! close(100)
+         ! open(100, file="dataTN_RL.dat", status="unknown")
+         !  do ii=1,numDisc
+         !     write(100,*) subX(ii), subPsiTN_RL(ii)
+         !   end do
+         ! close(100)
 
-         open(100, file="dataSG_LR.dat", status="unknown")
-          do ii=1,numDisc
-             write(100,*) subX(ii), subPsiSG_LR(ii)
-             !print*,subX(ii)
-           end do
-         close(100)
-         open(100, file="dataSG_RL.dat", status="unknown")
-          do ii=1,numDisc
-             write(100,*) subX(ii), subPsiSG_RL(ii)
-           end do
-         close(100)
+         ! open(100, file="dataSG_LR.dat", status="unknown")
+         !  do ii=1,numDisc
+         !     write(100,*) subX(ii), subPsiSG_LR(ii)
+         !     !print*,subX(ii)
+         !   end do
+         ! close(100)
+         ! open(100, file="dataSG_RL.dat", status="unknown")
+         !  do ii=1,numDisc
+         !     write(100,*) subX(ii), subPsiSG_RL(ii)
+         !   end do
+         ! close(100)
          outputsR=0_dp
         ! print*,'look',rhsFN,outputsR
          outputsR(1)=rhsFN
@@ -136,6 +139,7 @@ contains
          outputsL(2)=lhsTN
          outputsL(3)=0.0_dp
          outputsL(4)=lhsSG
+         !print*,outputsR
   end subroutine
 
 !   subroutine plot(xArray,subPsiFN,subPsiTN,subPsiPG,subPsiSG)

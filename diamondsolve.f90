@@ -41,7 +41,7 @@ contains
   rhs=psi_half
 
 
-
+!print*,'rhs',x_array!
   end subroutine
 
 
