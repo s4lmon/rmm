@@ -3,7 +3,6 @@ module materialtypes
   use diamondsolve
   use backdiamond
   use rmm
-  use extrapolate
 	implicit none
 
 	 type :: material
@@ -13,7 +12,7 @@ module materialtypes
     !Alphas and betas here
     integer :: numDisc, numSub, ii,total
     !sourcesR is for right hand boundary
-      real(kind=dp),dimension(4) :: sourcesL,sourcesR,outputsR,outputsL
+      real(kind=dp),dimension(4) :: outputsR,outputsL
       real(kind=dp),dimension(4) :: captureCS
       real(kind=dp),dimension(4,4) :: particleCS,factors
       real(kind=dp) :: sourceFN,sourceTN, sourcePG, sourceSG
@@ -24,7 +23,7 @@ module materialtypes
       !real(kind=dp),dimension(:),allocatable :: intervalFN,intervalTN_LR,intervalTN_RL,intervalPG,intervalSG_LR,intervalSG_RL
     !storing subPsiParticle production for each input particle
     !e.g. causeFN is a four dimensional array where dimension 1 represents the FN it causes, dimension 2 is the TN etc
-    real(kind=dp),dimension(:,:),allocatable :: causeFN, causeTN, causePG, causeSG
+    real(kind=dp),dimension(:,:),allocatable :: causeFN, causeTN, causePG, causeSG, tempFN, tempTN, tempPG, tempSG
   ! real(kind=dp) :: start,finish,omg
     contains
   	 procedure :: psi_interface=>psi_interface_material
@@ -52,6 +51,12 @@ module materialtypes
       allocate(m%causePG(6,numDisc))
       allocate(m%causeSG(6,numDisc))
 
+      allocate(m%tempTN(6,numDisc))
+      allocate(m%tempFN(6,numDisc))
+      allocate(m%tempPG(6,numDisc))
+      allocate(m%tempSG(6,numDisc))
+   
+
       if (countMat .eq. 1) then
          m%fn_tn=0.5_dp
           m%fn_sg=0.5_dp
@@ -64,25 +69,51 @@ module materialtypes
            m%factors(4,1)=m%fn_sg
            m%factors(4,2)=m%tn_sg
            m%factors(4,3)=m%pg_sg
-          m%sourceFN=1.0_dp
-          m%sourceTN=1.0_dp
-          m%sourcePG=1.0_dp
-          m%sourceSG=0.0_dp
-           m%sourcesL(1)=m%sourceFN
-            m%sourcesL(2)=m%sourceTN
-            m%sourcesL(3)=m%sourcePG
-            m%sourcesL(4)=m%sourceSG
-          m%sourcesR(1)=0.0_dp
-          m%sourcesR(2)=0.0_dp
-         m%sourcesR(3)=0.0_dp
-          m%sourcesR(4)=0.0_dp
+          
+                  m%particleCS=0.0_dp
+          m%particleCS(1,2)=1.0_dp
+          m%particleCS(1,4)=1.0_dp
+          m%particleCS(2,4)=1.0_dp
+          m%particleCS(3,4)=1.0_dp
+          m%captureCS=(/0.0_dp,0.0_dp,0.0_dp,0.0_dp/)
+      else if (countMat .eq. 2) then
+         m%fn_tn=0.5_dp
+          m%fn_sg=0.5_dp
+          m%tn_sg=0.5_dp
+          m%pg_sg=0.5_dp
+
+!===building for computation
+          m%factors=0.0_dp
+           m%factors(2,1)=m%fn_tn
+           m%factors(4,1)=m%fn_sg
+           m%factors(4,2)=m%tn_sg
+           m%factors(4,3)=m%pg_sg
+          
                   m%particleCS=0.0_dp
           m%particleCS(1,2)=1.0_dp
           m%particleCS(1,4)=1.0_dp
           m%particleCS(2,4)=1.0_dp
           m%particleCS(3,4)=1.0_dp
           m%captureCS=(/1.0_dp,1.0_dp,1.0_dp,1.0_dp/)
-      ! else if (countMat .eq. 2) then
+      else if (countMat .eq. 3) then
+           m%fn_tn=0.5_dp
+          m%fn_sg=0.5_dp
+          m%tn_sg=0.5_dp
+          m%pg_sg=0.5_dp
+
+!===building for computation
+          m%factors=0.0_dp
+           m%factors(2,1)=m%fn_tn
+           m%factors(4,1)=m%fn_sg
+           m%factors(4,2)=m%tn_sg
+           m%factors(4,3)=m%pg_sg
+          
+                  m%particleCS=0.0_dp
+          m%particleCS(1,2)=1.0_dp
+          m%particleCS(1,4)=1.0_dp
+          m%particleCS(2,4)=1.0_dp
+          m%particleCS(3,4)=1.0_dp
+          m%captureCS=(/0.0_dp,0.0_dp,0.0_dp,0.0_dp/)
       ! ...
       end if 
       end subroutine
@@ -100,7 +131,7 @@ module materialtypes
 !       real(kind=dp) :: domainLength,subLength
 !       integer :: numDisc, numSub, ii,total
 !       !sourcesR is for right hand boundary
-!       real(kind=dp),dimension(4) :: sourcesL, sourcesR, outputsR, outputsL
+       real(kind=dp),dimension(4) :: sourcesL, sourcesR!, outputsR, outputsL
 !       real(kind=dp),dimension(4) :: captureCS
 !       ! real(kind=dp),dimension(4,4) :: particleCS,factors
 !       real(kind=dp) :: sourceFN,sourceTN, sourcePG, sourceSG
@@ -117,16 +148,16 @@ module materialtypes
 
 
       !building alpha and beta matrix
-      self%sourcesL=0.0_dp
-      self%sourcesR=0.0_dp
-      self%sourcesL(1)=1.0_dp
+      sourcesL=0.0_dp
+      sourcesR=0.0_dp
+      sourcesL(1)=1.0_dp
 !=====================================================================================
 !building decay constants (alpha,beta)
 !switching on and off different particles and seeing what scattering they cause
     self%decays=0.0_dp
   
     !print*,'ttt',self%particleCS,'end'
-   call particleSolve(self%sourcesL,self%sourcesR,self%numDisc,self%captureCS,self%particleCS,self%factors,self%subLength,self%subX,self%subPsiFN,self%subPsiTN_LR,self%subPsiTN_RL,self%subPsiPG,self%subPsiSG_LR,self%subPsiSG_RL,self%outputsR,self%outputsL)
+   call particleSolve(sourcesL,sourcesR,self%numDisc,self%captureCS,self%particleCS,self%factors,self%subLength,self%subX,self%subPsiFN,self%subPsiTN_LR,self%subPsiTN_RL,self%subPsiPG,self%subPsiSG_LR,self%subPsiSG_RL,self%outputsR,self%outputsL)
    
     self%decays(1,1,1)=self%outputsR(1)
     self%decays(1,2,1)=self%outputsR(2)
@@ -142,9 +173,10 @@ module materialtypes
     self%causeFN(4,:)=self%subPsiSG_LR
     self%causeFN(5,:)=self%subPsiTN_RL
     self%causeFN(6,:)=self%subPsiSG_RL
-    self%sourcesL=0.0_dp
-    self%sourcesL(2)=1.0_dp
-   call particleSolve(self%sourcesL,self%sourcesR,self%numDisc,self%captureCS,self%particleCS,self%factors,self%subLength,self%subX,self%subPsiFN,self%subPsiTN_LR,self%subPsiTN_RL,self%subPsiPG,self%subPsiSG_LR,self%subPsiSG_RL,self%outputsR,self%outputsL)
+
+    sourcesL=0.0_dp
+    sourcesL(2)=1.0_dp
+   call particleSolve(sourcesL,sourcesR,self%numDisc,self%captureCS,self%particleCS,self%factors,self%subLength,self%subX,self%subPsiFN,self%subPsiTN_LR,self%subPsiTN_RL,self%subPsiPG,self%subPsiSG_LR,self%subPsiSG_RL,self%outputsR,self%outputsL)
     self%decays(2,2,1)=self%outputsR(2)
     self%decays(2,4,1)=self%outputsR(4)
 
@@ -157,9 +189,9 @@ module materialtypes
     self%causeTN(5,:)=self%subPsiTN_RL
     self%causeTN(6,:)=self%subPsiSG_RL
 
-    self%sourcesL=0.0_dp
-    self%sourcesL(3)=1.0_dp
-   call particleSolve(self%sourcesL,self%sourcesR,self%numDisc,self%captureCS,self%particleCS,self%factors,self%subLength,self%subX,self%subPsiFN,self%subPsiTN_LR,self%subPsiTN_RL,self%subPsiPG,self%subPsiSG_LR,self%subPsiSG_RL,self%outputsR,self%outputsL)
+    sourcesL=0.0_dp
+    sourcesL(3)=1.0_dp
+   call particleSolve(sourcesL,sourcesR,self%numDisc,self%captureCS,self%particleCS,self%factors,self%subLength,self%subX,self%subPsiFN,self%subPsiTN_LR,self%subPsiTN_RL,self%subPsiPG,self%subPsiSG_LR,self%subPsiSG_RL,self%outputsR,self%outputsL)
     self%decays(3,3,1)=self%outputsR(3)
     self%decays(3,4,1)=self%outputsR(4)
 
@@ -172,9 +204,9 @@ module materialtypes
     self%causePG(5,:)=self%subPsiTN_RL
     self%causePG(6,:)=self%subPsiSG_RL
 
-    self%sourcesL=0.0_dp
-    self%sourcesL(4)=1.0_dp
-   call particleSolve(self%sourcesL,self%sourcesR,self%numDisc,self%captureCS,self%particleCS,self%factors,self%subLength,self%subX,self%subPsiFN,self%subPsiTN_LR,self%subPsiTN_RL,self%subPsiPG,self%subPsiSG_LR,self%subPsiSG_RL,self%outputsR,self%outputsL)
+    sourcesL=0.0_dp
+    sourcesL(4)=1.0_dp
+   call particleSolve(sourcesL,sourcesR,self%numDisc,self%captureCS,self%particleCS,self%factors,self%subLength,self%subX,self%subPsiFN,self%subPsiTN_LR,self%subPsiTN_RL,self%subPsiPG,self%subPsiSG_LR,self%subPsiSG_RL,self%outputsR,self%outputsL)
     self%decays(4,4,1)=self%outputsR(4)
 
 
@@ -185,11 +217,12 @@ module materialtypes
     self%causeSG(5,:)=self%subPsiTN_RL
     self%causeSG(6,:)=self%subPsiSG_RL
     !==========================================
-    self%sourcesL(1)=self%sourceFN
-    self%sourcesL(2)=self%sourceTN
-    self%sourcesL(3)=self%sourcePG
-    self%sourcesL(4)=self%sourceSG
-   call particleSolve(self%sourcesL,self%sourcesR,self%numDisc,self%captureCS,self%particleCS,self%factors,self%subLength,self%subX,self%subPsiFN,self%subPsiTN_LR,self%subPsiTN_RL,self%subPsiPG,self%subPsiSG_LR,self%subPsiSG_RL,self%outputsR,self%outputsL)
+   !  self%sourcesL(1)=self%sourceFN
+   !  self%sourcesL(2)=self%sourceTN
+   !  self%sourcesL(3)=self%sourcePG
+   !  self%sourcesL(4)=self%sourceSG
+   ! call particleSolve(self%sourcesL,self%sourcesR,self%numDisc,self%captureCS,self%particleCS,self%factors,self%subLength,self%subX,self%subPsiFN,self%subPsiTN_LR,self%subPsiTN_RL,self%subPsiPG,self%subPsiSG_LR,self%subPsiSG_RL,self%outputsR,self%outputsL)
+
 
     end subroutine
   end module
